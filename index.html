@@ -383,7 +383,7 @@ cards.addEventListener('click', e => {
 // Speak all
 speakAllBtn.addEventListener('click', () => {
   if (!currentWords.length) return;
-  speakSequence(currentWords);
+  speakSequence(currentWords, input.value);
 });
 
 // Copy to clipboard
@@ -397,15 +397,16 @@ copyBtn.addEventListener('click', () => {
 });
 
 function speakWord(word) {
+  console.log('Speaking:'+ word);
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(word);
-  u.rate = 0.85;
+  u.rate = 0.82;
   u.pitch = 1;
   window.speechSynthesis.speak(u);
 }
 
-function speakSequence(words) {
+function speakSequence(words, wholeword) {
   if (!window.speechSynthesis) {
     alert('Sorry, your browser does not support speech synthesis.');
     return;
@@ -418,8 +419,12 @@ function speakSequence(words) {
 
   let i = 0;
 
+  speakWord(wholeword);
+
   function next() {
     if (i >= words.length) {
+      // Say it again 
+      speakWord(wholeword);
       allCards.forEach(c => c.classList.remove('speaking'));
       speakAllBtn.disabled = false;
       speakAllBtn.innerHTML = '▶ Read It Out';
@@ -428,6 +433,7 @@ function speakSequence(words) {
     allCards.forEach(c => c.classList.remove('speaking'));
     allCards[i]?.classList.add('speaking');
     const speak = words[i].char + ' As in ' + words[i].word;
+    console.log('Speaking:'+ speak);
     const u = new SpeechSynthesisUtterance(speak);
     u.rate = 0.82;
     u.pitch = 1;
@@ -435,10 +441,10 @@ function speakSequence(words) {
     u.onerror = () => { i++; next(); };
     window.speechSynthesis.speak(u);
 
-    console.log(speak);
   }
 
   next();
+  
 }
 
 // Auto-focus
