@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spell It Out</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1916;
+    --card: #222018;
+    --accent: #e8c97a;
+    --accent2: #c97a4a;
+    --text: #f0ebe0;
+    --muted: #7a756a;
+    --border: #2e2b25;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 10%, rgba(232,201,122,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 80% 90%, rgba(201,122,74,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.4rem, 8vw, 3.5rem);
+    line-height: 1.05;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    margin-top: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+  }
+
+  .input-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--text);
+    letter-spacing: 0.08em;
+    width: 100%;
+    caret-color: var(--accent);
+  }
+
+  input[type="text"]::placeholder {
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  .clear-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.25rem;
+    line-height: 1;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+  .clear-btn:hover { color: var(--text); }
+
+  .cards-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    min-height: 2rem;
+  }
+
+  .letter-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    animation: slideIn 0.25s cubic-bezier(0.16,1,0.3,1) both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .letter-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .letter-card.speaking::before {
+    background: var(--accent2);
+    opacity: 1;
+    animation: pulse-bar 0.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-bar {
+    from { opacity: 0.4; }
+    to   { opacity: 1; }
+  }
+
+  .char {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    width: 2rem;
+    text-align: center;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .sep {
+    color: var(--border);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .word {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.01em;
+    flex: 1;
+  }
+
+  .speak-one {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .speak-one:hover { border-color: var(--accent); color: var(--accent); }
+
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 0.9rem 1.2rem;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0f0e0c;
+    font-weight: 500;
+  }
+  .btn-primary:hover { background: #f0d48a; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--muted); }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 2rem 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .empty.visible { opacity: 1; }
+
+  .footer {
+    text-align: center;
+    margin-top: 2.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    opacity: 0.5;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="wrapper">
+  <header>
+    <div class="eyebrow">Phonetic Name Speller</div>
+    <h1>Spell It <em>Out</em></h1>
+    <p class="subtitle">Type your name — get clear, natural words anyone can follow.</p>
+  </header>
+
+  <div class="input-area">
+    <input type="text" id="nameInput" placeholder="Your name..." maxlength="30" autocomplete="off" spellcheck="false" />
+    <button class="clear-btn" id="clearBtn" title="Clear">✕</button>
+  </div>
+
+  <div class="cards-area" id="cardsArea">
+    <div class="empty" id="emptyMsg">Start typing to see your phonetic breakdown</div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" id="copyBtn">⊞ Copy</button>
+    <button class="btn btn-primary" id="speakAllBtn" disabled>▶ Read It Out</button>
+  </div>
+
+  <div class="footer">Uses NATO + common words · Web Speech API</div>
+</div>
+
+<script>
+// Curated word list — natural, clear, everyday words
+const PHONETIC = {
+  A: 'Alpha',    B: 'Bravo',    C: 'Charlie',  D: 'Delta',
+  E: 'Echo',     F: 'Foxtrot',  G: 'Golf',     H: 'Hotel',
+  I: 'India',    J: 'Juliet',   K: 'Kilo',     L: 'Lima',
+  M: 'Mike',     N: 'November', O: 'Oscar',    P: 'Papa',
+  Q: 'Quebec',   R: 'Romeo',    S: 'Sierra',   T: 'Tango',
+  U: 'Uniform',  V: 'Victor',   W: 'Whiskey',  X: 'X-Ray',
+  Y: 'Yankee',   Z: 'Zulu',
+};
+
+const input  = document.getElementById('nameInput');
+const cards  = document.getElementById('cardsArea');
+const empty  = document.getElementById('emptyMsg');
+const speakAllBtn = document.getElementById('speakAllBtn');
+const copyBtn     = document.getElementById('copyBtn');
+const clearBtn    = document.getElementById('clearBtn');
+
+let currentWords = [];
+let speaking = false;
+
+function render(name) {
+  // Remove old cards (keep empty msg)
+  cards.querySelectorAll('.letter-card').forEach(c => c.remove());
+  currentWords = [];
+
+  const letters = name.toUpperCase().replace(/[^A-Z]/g, '').split('');
+
+  if (!letters.length) {
+    empty.classList.add('visible');
+    speakAllBtn.disabled = true;
+    return;
+  }
+
+  empty.classList.remove('visible');
+
+  letters.forEach((ch, i) => {
+    const word = PHONETIC[ch] || ch;
+    currentWords.push({ char: ch, word });
+
+    const card = document.createElement('div');
+    card.className = 'letter-card';
+    card.dataset.index = i;
+    card.style.animationDelay = `${i * 40}ms`;
+    card.innerHTML = `
+      <span class="char">${ch}</span>
+      <span class="sep">—</span>
+      <span class="word">${word}</span>
+      <button class="speak-one" data-word="${word}" title="Speak this">▶ speak</button>
+    `;
+    cards.appendChild(card);
+  });
+
+  speakAllBtn.disabled = false;
+}
+
+input.addEventListener('input', () => render(input.value));
+
+clearBtn.addEventListener('click', () => {
+  input.value = '';
+  render('');
+  input.focus();
+});
+
+// Speak one letter
+cards.addEventListener('click', e => {
+  const btn = e.target.closest('.speak-one');
+  if (!btn) return;
+  const word = btn.dataset.word;
+  speakWord(word);
+});
+
+// Speak all
+speakAllBtn.addEventListener('click', () => {
+  if (!currentWords.length) return;
+  speakSequence(currentWords);
+});
+
+// Copy to clipboard
+copyBtn.addEventListener('click', () => {
+  if (!currentWords.length) return;
+  const text = currentWords.map(w => `${w.char} — ${w.word}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    copyBtn.textContent = '✓ Copied';
+    setTimeout(() => copyBtn.innerHTML = '⊞ Copy', 1500);
+  });
+});
+
+function speakWord(word) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(word);
+  u.rate = 0.85;
+  u.pitch = 1;
+  window.speechSynthesis.speak(u);
+}
+
+function speakSequence(words) {
+  if (!window.speechSynthesis) {
+    alert('Sorry, your browser does not support speech synthesis.');
+    return;
+  }
+  window.speechSynthesis.cancel();
+
+  const allCards = cards.querySelectorAll('.letter-card');
+  speakAllBtn.disabled = true;
+  speakAllBtn.textContent = '⏹ Speaking…';
+
+  let i = 0;
+
+  function next() {
+    if (i >= words.length) {
+      allCards.forEach(c => c.classList.remove('speaking'));
+      speakAllBtn.disabled = false;
+      speakAllBtn.innerHTML = '▶ Read It Out';
+      return;
+    }
+    allCards.forEach(c => c.classList.remove('speaking'));
+    allCards[i]?.classList.add('speaking');
+    const speak = words[i].char + ' As in ' + words[i].word;
+    const u = new SpeechSynthesisUtterance(speak);
+    u.rate = 0.82;
+    u.pitch = 1;
+    u.onend = () => { i++; next(); };
+    u.onerror = () => { i++; next(); };
+    window.speechSynthesis.speak(u);
+
+    console.log(speak);
+  }
+
+  next();
+}
+
+// Auto-focus
+input.focus();
+</script>
+</body>
+</html>
