@@ -18,3 +18,6 @@ Addon: there should speak out option where the website just narrates those
 
 Manual changes:
 Include alphababet when reading
+
+Deployed:
+https://aravindgear4.github.io/spell_it_out/
